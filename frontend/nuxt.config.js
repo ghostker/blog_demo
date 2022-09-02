@@ -39,6 +39,14 @@ export default {
         type: "collection",
       },
       {
+        name: "gallery",
+        type: "collection",
+      },
+      {
+        name: "galleries",
+        type: "collection",
+      },
+      {
         name: "homepage",
         type: "single",
       },

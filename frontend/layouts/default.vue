@@ -68,7 +68,17 @@
               </nuxt-link>
             </li>
           </ul>
-          <div v-if="!isLogin" class="uk-navbar-item">
+          <div v-if="isLogged" class="uk-navbar-item">
+            <div class="uk-button-group">
+              <button
+                class="uk-button btn-small uk-button-default"
+                @click="onLogout"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+          <div v-else class="uk-navbar-item">
             <form action="javascript:void(0)">
               <input
                 v-model="email"
@@ -170,16 +180,22 @@ export default {
     return {
       currentIndex: 0,
       categories: [],
-      isLogin: false,
+      isLogged: false,
       isRegister: false,
       email: "",
       password: "",
       rePassword: "",
     };
   },
-  mounted() {
-    console.log(this.$uikit.notification);
+  async mounted() {
     this.$set(this, "currentIndex", 0);
+    try {
+      this.user = await this.$strapi.fetchUser();
+      if (!this.user) throw new Error("not user");
+      this.$set(this, "isLogged", true);
+    } catch (err) {
+      console.log(err);
+    }
   },
   methods: {
     async onLogin() {
@@ -188,13 +204,11 @@ export default {
         return this.$set(this, "isRegister", false);
       }
       try {
-        const result = await this.$strapi.login({
+        await this.$strapi.login({
           identifier: this.email,
           password: this.password,
         });
-        console.log(result);
-        const { jwt, user } = result;
-        this.setToken(jwt, user);
+        this.setToken();
       } catch (err) {
         if (err.message.includes("Identifier or password invalid."))
           return this.$uikit.notification(
@@ -226,29 +240,25 @@ export default {
             "Two passwords are different",
             "danger"
           );
-        const result = await this.$strapi.resgister({
+        await this.$strapi.resgister({
           email: this.email,
           username: this.email.split("@")[0].replace(regSpecialChar, ""),
           password: this.password,
         });
-        const { jwt, user } = result;
-        this.setToken(jwt, user);
       } catch (err) {
         console.error(err);
       }
     },
-    setToken(jwt, user) {
+    setToken() {
       this.$set(this, "email", "");
       this.$set(this, "password", "");
       this.$set(this, "rePassword", "");
-      window.localStorage.setItem("jwt", jwt);
-      window.localStorage.setItem("userData", JSON.stringify(user));
       this.$router.push("/");
     },
     async onLogout() {
       try {
-        const result = await this.$strapi.logout();
-        console.log("onLogout", result);
+        await this.$strapi.logout();
+        this.setToken();
       } catch (err) {
         console.error(err);
       }

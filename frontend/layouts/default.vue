@@ -68,6 +68,51 @@
               </nuxt-link>
             </li>
           </ul>
+          <div v-if="!isLogin" class="uk-navbar-item">
+            <form action="javascript:void(0)">
+              <input
+                v-model="email"
+                class="uk-input uk-form-width-small"
+                type="email"
+                placeholder="Email:"
+              />
+              <input
+                v-model="password"
+                class="uk-input uk-form-width-small"
+                type="password"
+                placeholder="Password:"
+              />
+              <input
+                v-if="isRegister"
+                v-model="rePassword"
+                class="uk-input uk-form-width-small"
+                type="password"
+                placeholder="Repeat Password:"
+              />
+              <div class="uk-button-group">
+                <button
+                  :class="[
+                    'uk-button btn-small',
+                    isRegister ? 'uk-button-default' : 'uk-button-primary',
+                  ]"
+                  @click="onLogin"
+                >
+                  Login
+                </button>
+                <button
+                  :class="[
+                    'uk-button btn-small',
+                    isRegister
+                      ? 'uk-button-primary'
+                      : 'uk-button-default uk-background-default',
+                  ]"
+                  @click="onRegister"
+                >
+                  Register
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </nav>
     </header>
@@ -125,12 +170,89 @@ export default {
     return {
       currentIndex: 0,
       categories: [],
+      isLogin: false,
+      isRegister: false,
+      email: "",
+      password: "",
+      rePassword: "",
     };
   },
   mounted() {
+    console.log(this.$uikit.notification);
     this.$set(this, "currentIndex", 0);
   },
   methods: {
+    async onLogin() {
+      if (this.isRegister) {
+        this.$set(this, "rePassword", "");
+        return this.$set(this, "isRegister", false);
+      }
+      try {
+        const result = await this.$strapi.login({
+          identifier: this.email,
+          password: this.password,
+        });
+        console.log(result);
+        const { jwt, user } = result;
+        this.setToken(jwt, user);
+      } catch (err) {
+        if (err.message.includes("Identifier or password invalid."))
+          return this.$uikit.notification(
+            "email or password invalid.",
+            "danger"
+          );
+        console.error(err);
+      }
+    },
+    async onRegister() {
+      if (!this.isRegister) {
+        this.$set(this, "rePassword", "");
+        return this.$set(this, "isRegister", true);
+      }
+      try {
+        const regSpecialChar = new RegExp(
+          "[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]"
+        );
+        const regEmail = new RegExp(
+          "^([a-zA-Z]|[0-9])(\\w|\\-)+@[a-zA-Z0-9]+\\.([a-zA-Z]{2,4})$"
+        );
+        const regPassword = new RegExp("^(?=\\S*[a-z])(?=\\S*\\d)\\S{8,}$");
+        if (!this.email || !regEmail.test(this.email))
+          return this.$uikit.notification("Email violation", "danger");
+        if (!this.password || !regPassword.test(this.password))
+          return this.$uikit.notification("Password violation", "danger");
+        if (this.password !== this.rePassword)
+          return this.$uikit.notification(
+            "Two passwords are different",
+            "danger"
+          );
+        const result = await this.$strapi.resgister({
+          email: this.email,
+          username: this.email.split("@")[0].replace(regSpecialChar, ""),
+          password: this.password,
+        });
+        const { jwt, user } = result;
+        this.setToken(jwt, user);
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    setToken(jwt, user) {
+      this.$set(this, "email", "");
+      this.$set(this, "password", "");
+      this.$set(this, "rePassword", "");
+      window.localStorage.setItem("jwt", jwt);
+      window.localStorage.setItem("userData", JSON.stringify(user));
+      this.$router.push("/");
+    },
+    async onLogout() {
+      try {
+        const result = await this.$strapi.logout();
+        console.log("onLogout", result);
+      } catch (err) {
+        console.error(err);
+      }
+    },
     onNavChanged(index) {
       this.$set(this, "currentIndex", index);
     },
@@ -148,6 +270,12 @@ export default {
 }
 .main-title a {
   font-size: 1.2rem !important;
+}
+.btn-small {
+  width: 100px;
+  text-align: center;
+  padding: 0;
+  margin-left: -5px;
 }
 .short-header {
   line-height: 3rem;

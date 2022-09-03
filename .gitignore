@@ -106,6 +106,7 @@ coverage
 ############################
 
 .env
+.env.*
 .nuxt
 .output
 license.txt

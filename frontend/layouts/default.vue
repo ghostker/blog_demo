@@ -240,7 +240,7 @@ export default {
             "Two passwords are different",
             "danger"
           );
-        await this.$strapi.resgister({
+        await this.$strapi.register({
           email: this.email,
           username: this.email.split("@")[0].replace(regSpecialChar, ""),
           password: this.password,

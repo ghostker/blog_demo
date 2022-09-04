@@ -4,10 +4,12 @@
 $ yarn develop
 
 # build
-frontend -> dist
-$ yarn generate
-$ yarn start
 
 backend -> build
 $ yarn build
+$ yarn start
+
+frontend -> dist
+$ backend: yarn start/yarn develop
+$ yarn generate
 $ yarn start

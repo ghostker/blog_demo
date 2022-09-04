@@ -189,13 +189,7 @@ export default {
   },
   async mounted() {
     this.$set(this, "currentIndex", 0);
-    try {
-      this.user = await this.$strapi.fetchUser();
-      if (!this.user) throw new Error("not user");
-      this.$set(this, "isLogged", true);
-    } catch (err) {
-      console.log(err);
-    }
+    this.checkLogged();
   },
   methods: {
     async onLogin() {
@@ -216,6 +210,15 @@ export default {
             "danger"
           );
         console.error(err);
+      }
+    },
+    async checkLogged() {
+      try {
+        this.user = await this.$strapi.fetchUser();
+        if (!this.user) throw new Error("not user");
+        this.$set(this, "isLogged", true);
+      } catch (err) {
+        console.log(err);
       }
     },
     async onRegister() {
@@ -253,7 +256,7 @@ export default {
       this.$set(this, "email", "");
       this.$set(this, "password", "");
       this.$set(this, "rePassword", "");
-      this.$router.push("/");
+      this.checkLogged();
     },
     async onLogout() {
       try {

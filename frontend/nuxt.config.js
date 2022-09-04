@@ -1,7 +1,6 @@
 const strapiBaseUri = process.env.API_URL || "http://localhost:1337";
 
 export default {
-  buildDir: "build",
   target: "static",
   env: {
     strapiBaseUri,

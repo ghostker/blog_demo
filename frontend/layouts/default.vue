@@ -176,7 +176,7 @@ export default {
   async fetch() {
     this.categories = await this.$strapi.find("categories");
   },
-  data: function () {
+  data() {
     return {
       currentIndex: 0,
       categories: [],

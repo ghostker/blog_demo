@@ -262,6 +262,7 @@ export default {
       try {
         await this.$strapi.logout();
         this.setToken();
+        this.checkLogged();
       } catch (err) {
         console.error(err);
       }

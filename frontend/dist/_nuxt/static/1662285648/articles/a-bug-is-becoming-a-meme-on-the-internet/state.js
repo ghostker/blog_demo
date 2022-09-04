@@ -1,1 +1,0 @@
-window.__NUXT__=(function(a){return {staticAssetsBase:"\u002F_nuxt\u002Fstatic\u002F1662285648",layout:"default",error:a,serverRendered:true,routePath:"\u002Farticles\u002Fa-bug-is-becoming-a-meme-on-the-internet",config:{strapi:{url:"https:\u002F\u002Fkkaxp.cn\u002Fapi"}},strapi:{user:a}}}(null));
